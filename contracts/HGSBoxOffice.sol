@@ -74,11 +74,11 @@ contract HGSBoxOffice {
   function crossing()
     public
     payable
-    notRecorded
     lessFee(
       admin.getVehicle(msg.sender).vehicleClass,
       msg.value.getConversionRate(s_priceFeed)
     )
+    notRecorded
   {
     admin.crossing(msg.sender);
   }

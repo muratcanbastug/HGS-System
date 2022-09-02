@@ -53,6 +53,10 @@ contract Administration {
     i_priceFeedAddress = _priceFeedAddress;
   }
 
+  function getPriceFeed() public view returns (address) {
+    return i_priceFeedAddress;
+  }
+
   modifier onlyOwner() {
     if (msg.sender != i_owner) revert Administration__NotOwner();
     _;

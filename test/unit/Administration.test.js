@@ -14,18 +14,25 @@ const { developmentChains } = require("../../helper-hardhat-config");
       beforeEach(async () => {
         deployer = (await getNamedAccounts()).deployer;
         user = (await getNamedAccounts()).user;
+        await deployments.fixture(["all"]);
+        administration = await ethers.getContract("Administration", deployer);
 
-        const officeAddress = await admin.getOfficeAddress(0);
+        const transactionResponse = await administration.createOffice(
+          5,
+          10,
+          15
+        );
+        await transactionResponse.wait(1);
+
+        const officeAddress = await administration.getOfficeAddress(0);
         const HGSBoxOfficeFactory = await ethers.getContractFactory(
           "HGSBoxOffice"
         );
         const hgsBoxOffice = await HGSBoxOfficeFactory.attach(officeAddress);
-        const connectedhgsboxoffice = await hgsBoxOffice.connect(
+        connectedhgsboxoffice = await hgsBoxOffice.connect(
           ethers.provider.getSigner(user)
         );
 
-        await deployments.fixture(["all"]);
-        administration = await ethers.getContract("Administration", deployer);
         mockV3Aggregator = await ethers.getContract(
           "MockV3Aggregator",
           deployer
@@ -43,7 +50,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
           await expect(
             connectedhgsboxoffice.crossing()
           ).to.be.revertedWithCustomError(
-            administration,
+            connectedhgsboxoffice,
             "HGSBoxOffice__LessFee"
           );
         });
@@ -76,7 +83,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
             deployer
           );
 
-          assert(endingFundMeBalance, 0);
+          assert(endingAdminBalance, 0);
           assert(
             startingDeployerBalance.add(startingDeployerBalance).toString(),
             endingDeployerBalance.add(gasCost).toString()
@@ -93,7 +100,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
             attackerConnectedContract.withdraw()
           ).to.be.revertedWithCustomError(
             attackerConnectedContract,
-            "Adminisitration__NotOwner"
+            "Administration__NotOwner"
           );
         });
       });
